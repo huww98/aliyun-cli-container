@@ -14,8 +14,9 @@ jobs:
       - name: Query the latest version of aliyun-cli
         id: query
         run: |
-          latest_version=$(curl -s https://api.github.com/repos/aliyun/aliyun-cli/releases/latest | jq -r '.tag_name')
-          echo ::set-output name=latest_version::$latest_version
+          latest_version=$(curl -s https://api.github.com/repos/aliyun/aliyun-cli/releases/latest | jq -r '.name')
+          echo latest_version=${latest_version#v} >> $GITHUB_OUTPUT
+          echo "The latest version of aliyun-cli is $latest_version" >> $GITHUB_STEP_SUMMARY
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
