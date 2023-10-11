@@ -1,0 +1,42 @@
+name: container_build
+
+on:
+  push:
+    branches:
+      - 'main'
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the latest version of aliyun-cli
+        id: query
+        run: |
+          latest_version=$(curl -s https://api.github.com/repos/aliyun/aliyun-cli/releases/latest | jq -r '.tag_name')
+          echo ::set-output name=latest_version::$latest_version
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Aliyun Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: huww98@163.com
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            CLIVERSION=${{ steps.query.outputs.latest_version }}
+          tags: |
+            registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:lastest
+            registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:${{ steps.query.outputs.latest_version }}
