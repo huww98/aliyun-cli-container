@@ -41,3 +41,5 @@ jobs:
           tags: |
             registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:lastest
             registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:${{ steps.query.outputs.latest_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
