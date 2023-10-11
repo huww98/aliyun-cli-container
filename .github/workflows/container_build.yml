@@ -39,7 +39,7 @@ jobs:
           build-args: |
             CLIVERSION=${{ steps.query.outputs.latest_version }}
           tags: |
-            registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:lastest
+            registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:latest
             registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:${{ steps.query.outputs.latest_version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
