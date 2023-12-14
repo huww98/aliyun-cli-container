@@ -1,0 +1,15 @@
+FROM --platform=$BUILDPLATFORM buildpack-deps:bookworm-curl AS download
+ARG TARGETARCH
+ARG CLIVERSION=v1.7.17
+
+RUN apt-get update && apt-get install -y \
+    unzip
+
+RUN curl -o ossutil.zip -L https://github.com/aliyun/ossutil/releases/download/v${CLIVERSION}/ossutil-v${CLIVERSION}-linux-${TARGETARCH}.zip && \
+    unzip ossutil.zip && \
+    mv ossutil-v${CLIVERSION}-linux-${TARGETARCH}/ossutil /ossutil && \
+    chmod +x /ossutil
+
+FROM debian:bookworm
+COPY --link --from=download /ossutil /usr/local/bin/ossutil
+ENTRYPOINT ["/usr/local/bin/ossutil"]

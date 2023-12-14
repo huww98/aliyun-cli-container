@@ -12,11 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Query the latest version of aliyun-cli
-        id: query
+        id: query-aliyun-cli
         run: |
           latest_version=$(curl -s https://api.github.com/repos/aliyun/aliyun-cli/releases/latest | jq -r '.name')
           echo latest_version=${latest_version#v} >> $GITHUB_OUTPUT
           echo "The latest version of aliyun-cli is $latest_version" >> $GITHUB_STEP_SUMMARY
+      - name: Query the latest version of ossutil
+        id: query-ossutil
+        run: |
+          latest_version=$(curl -s https://api.github.com/repos/aliyun/ossutil/releases/latest | jq -r '.name')
+          echo latest_version=${latest_version#v} >> $GITHUB_OUTPUT
+          echo "The latest version of ossutil is $latest_version" >> $GITHUB_STEP_SUMMARY
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -31,15 +37,29 @@ jobs:
           username: huww98@163.com
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build and push
+      - name: Build and push aliyun-cli
         uses: docker/build-push-action@v5
         with:
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
-            CLIVERSION=${{ steps.query.outputs.latest_version }}
+            CLIVERSION=${{ steps.query-aliyun-cli.outputs.latest_version }}
           tags: |
             registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:latest
-            registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:${{ steps.query.outputs.latest_version }}
+            registry.cn-hangzhou.aliyuncs.com/huww98/aliyun-cli:${{ steps.query-aliyun-cli.outputs.latest_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push ossutil
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          file: Dockerfile.ossutil
+          build-args: |
+            CLIVERSION=${{ steps.query-ossutil.outputs.latest_version }}
+          tags: |
+            registry.cn-hangzhou.aliyuncs.com/huww98/ossutil:latest
+            registry.cn-hangzhou.aliyuncs.com/huww98/ossutil:${{ steps.query-ossutil.outputs.latest_version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
